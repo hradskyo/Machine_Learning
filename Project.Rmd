@@ -1,0 +1,57 @@
+---
+title: "Practical Machine Learning Project"
+output: html_document
+---
+<big>**Model building**</big><p>
+
+Loading data and descrbining them
+```{r,echo=TRUE, error=FALSE, warning=FALSE,results='hide'}
+library(caret)
+library(psych)
+library(rattle)
+library(rpart)
+setwd("j://")
+pre_training<-read.csv("./Coursera/Machine learning/Project/pml-training.csv")
+popis<-describe(pre_training)
+#write.table(popis, file="./Coursera/Machine learning/Project/popis.txt",sep="\t")
+```
+Using only numeric predictors with complete data (I decided to exlude incomplete data instead of imputing them - due to very low numbers of obseravtion in incomplete data).
+```{r}
+tridy<-NULL
+for (i in 1:length(pre_training)){
+    tridy[i]<-class(pre_training[,i])
+}
+DATA_pre<-pre_training[,popis$vars==160|popis$n==19622&tridy!="factor"]
+DATA<-DATA_pre[,-c(1:4)]
+```
+
+<big>**Preprocessing**</big><p>
+Splite data to train and test (60%, training, 40% testing)
+```{r}
+#pre processing
+inTrain<-createDataPartition(DATA$classe, p=0.60, list=FALSE)
+training<-DATA[inTrain,]
+testing<-DATA[-inTrain,]
+set.seed(32323)
+```
+
+<big>**Training**</big><p>
+
+Random forest method
+```{r,error=FALSE,warning=FALSE}
+#training
+model2<-train(data=training, classe~., method="rf",trControl = trainControl(method = "cv", number = 4, allowParallel = TRUE,verboseIter = TRUE))
+```
+
+<big>**Final Model, Testing and Error**</big><p>
+
+The cross validation was performed using 40% of the data (from file training).
+
+The accuracy was very good: 99.3% 95CI (99.1 - 99.5). You can see the sensitivity and specificity by Class.
+
+
+```{r,error=FALSE,warning=FALSE}
+model2$finalModel
+predic.model2<-predict(model2,newdata=testing)
+confusionMatrix(predic.model2, testing$classe)
+```
