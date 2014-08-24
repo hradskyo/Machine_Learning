@@ -5,15 +5,17 @@ output: html_document
 <big>**Model building**</big><p>
 
 Loading data and descrbining them
-```{r,echo=TRUE, error=FALSE, warning=FALSE,results='hide'}
+```{r,echo=FALSE, error=FALSE, warning=FALSE,results='hide'}
 library(caret)
 library(psych)
 library(rattle)
 library(rpart)
+```
+
+```{r,echo=TRUE, error=FALSE, warning=FALSE,results='hide'}
 setwd("j://")
 pre_training<-read.csv("./Coursera/Machine learning/Project/pml-training.csv")
 popis<-describe(pre_training)
-#write.table(popis, file="./Coursera/Machine learning/Project/popis.txt",sep="\t")
 ```
 Using only numeric predictors with complete data (I decided to exlude incomplete data instead of imputing them - due to very low numbers of obseravtion in incomplete data).
 ```{r}
@@ -48,7 +50,6 @@ model2<-train(data=training, classe~., method="rf",trControl = trainControl(meth
 The cross validation was performed using 40% of the data (from file training).
 
 The accuracy was very good: 99.3% 95CI (99.1 - 99.5). You can see the sensitivity and specificity by Class.
-
 
 ```{r,error=FALSE,warning=FALSE}
 model2$finalModel
